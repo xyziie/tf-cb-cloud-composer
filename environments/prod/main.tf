@@ -4,12 +4,12 @@
 # Prod uses larger Composer resources, private endpoints, and deny-all egress.
 ################################################################################
 
-module "folder" {
-  source = "../../modules/folder"
+# module "folder" {
+#   source = "../../modules/folder"
 
-  display_name = "${var.env}-folder"
-  parent       = var.org_id
-}
+#   display_name = "${var.env}-folder"
+#   parent       = var.org_id
+# }
 
 module "iam" {
   source = "../../modules/iam"

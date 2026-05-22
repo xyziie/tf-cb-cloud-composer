@@ -4,12 +4,12 @@
 ################################################################################
 
 # ── Folder ────────────────────────────────────────────────────────────────────
-module "folder" {
-  source = "../../modules/folder"
+# module "folder" {
+#   source = "../../modules/folder"
 
-  display_name = "${var.env}-folder"
-  parent       = var.org_id   # "organizations/<ORG_ID>"
-}
+#   display_name = "${var.env}-folder"
+#   parent       = var.org_id   # "organizations/<ORG_ID>"
+# }
 
 # ── IAM ───────────────────────────────────────────────────────────────────────
 module "iam" {
