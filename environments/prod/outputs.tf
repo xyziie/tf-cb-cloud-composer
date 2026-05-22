@@ -1,7 +1,7 @@
-output "folder_id" {
-  description = "GCP Folder ID"
-  value       = module.folder.folder_id
-}
+# output "folder_id" {
+#   description = "GCP Folder ID"
+#   value       = module.folder.folder_id
+# }
 
 output "vpc_network_name" {
   description = "VPC network name"
