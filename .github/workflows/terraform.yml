@@ -46,13 +46,6 @@ jobs:
         working-directory: environments/${{ env.ENV }}
         run: terraform init
 
-      - name: Import Existing SAs
-        working-directory: environments/${{ env.ENV }}
-        run: |
-          terraform import \
-            'module.iam.google_service_account.accounts["terraform-sa-dev"]' \
-            projects/qwiklabs-gcp-01-3ba4b097d6eb/serviceAccounts/terraform-sa-dev@qwiklabs-gcp-01-3ba4b097d6eb.iam.gserviceaccount.com || true
-
       - name: Terraform Validate
         working-directory: environments/${{ env.ENV }}
         run: terraform validate
