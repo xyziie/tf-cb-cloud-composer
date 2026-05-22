@@ -1,43 +1,40 @@
 ################################################################################
 # modules/iam/main.tf
-# Manages IAM bindings at project level with optional folder-level bindings.
-# Uses authoritative member-level bindings to avoid state drift.
 ################################################################################
 
 # ── Project-level IAM bindings ────────────────────────────────────────────────
-resource "google_project_iam_member" "project_bindings" {
-  for_each = {
-    for binding in local.flattened_project_bindings :
-    "${binding.role}__${binding.member}" => binding
-  }
-
-  project = var.project_id
-  role    = each.value.role
-  member  = each.value.member
-
-  dynamic "condition" {
-    for_each = each.value.condition != null ? [each.value.condition] : []
-    content {
-      title       = condition.value.title
-      description = lookup(condition.value, "description", null)
-      expression  = condition.value.expression
-    }
-  }
-}
+# Disabled for Qwiklabs — IAM policy updates blocked
+# resource "google_project_iam_member" "project_bindings" {
+#   for_each = {
+#     for binding in local.flattened_project_bindings :
+#     "${binding.role}__${binding.member}" => binding
+#   }
+#   project = var.project_id
+#   role    = each.value.role
+#   member  = each.value.member
+#   dynamic "condition" {
+#     for_each = each.value.condition != null ? [each.value.condition] : []
+#     content {
+#       title       = condition.value.title
+#       description = lookup(condition.value, "description", null)
+#       expression  = condition.value.expression
+#     }
+#   }
+# }
 
 # ── Folder-level IAM bindings (optional) ─────────────────────────────────────
-resource "google_folder_iam_member" "folder_bindings" {
-  for_each = {
-    for binding in local.flattened_folder_bindings :
-    "${binding.folder}__${binding.role}__${binding.member}" => binding
-  }
+# Disabled for Qwiklabs — no org/folder access
+# resource "google_folder_iam_member" "folder_bindings" {
+#   for_each = {
+#     for binding in local.flattened_folder_bindings :
+#     "${binding.folder}__${binding.role}__${binding.member}" => binding
+#   }
+#   folder = each.value.folder
+#   role   = each.value.role
+#   member = each.value.member
+# }
 
-  folder = each.value.folder
-  role   = each.value.role
-  member = each.value.member
-}
-
-# ── Service Account creation (optional) ──────────────────────────────────────
+# ── Service Account creation ──────────────────────────────────────────────────
 resource "google_service_account" "accounts" {
   for_each = { for sa in var.service_accounts : sa.account_id => sa }
 
@@ -47,20 +44,20 @@ resource "google_service_account" "accounts" {
   description  = lookup(each.value, "description", null)
 }
 
-# Grant service accounts their roles at project level
-resource "google_project_iam_member" "sa_bindings" {
-  for_each = {
-    for pair in local.sa_role_pairs :
-    "${pair.account_id}__${pair.role}" => pair
-  }
-
-  project = var.project_id
-  role    = each.value.role
-  member  = "serviceAccount:${google_service_account.accounts[each.value.account_id].email}"
-}
+# ── SA role bindings ──────────────────────────────────────────────────────────
+# Disabled for Qwiklabs — IAM policy updates blocked
+# resource "google_project_iam_member" "sa_bindings" {
+#   for_each = {
+#     for pair in local.sa_role_pairs :
+#     "${pair.account_id}__${pair.role}" => pair
+#   }
+#   project = var.project_id
+#   role    = each.value.role
+#   member  = "serviceAccount:${google_service_account.accounts[each.value.account_id].email}"
+# }
 
 ################################################################################
-# Locals — flatten nested role/member lists
+# Locals
 ################################################################################
 locals {
   flattened_project_bindings = flatten([

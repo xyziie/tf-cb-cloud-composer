@@ -11,45 +11,45 @@
 #   parent       = var.org_id
 # }
 
-module "iam" {
-  source = "../../modules/iam"
+# module "iam" {
+#   source = "../../modules/iam"
 
-  project_id = var.project_id
+#   project_id = var.project_id
 
-  service_accounts = [
-    {
-      account_id   = "composer-sa-${var.env}"
-      display_name = "Cloud Composer SA (${var.env})"
-      description  = "Service account for Cloud Composer workers"
-      roles = [
-        "roles/composer.worker",
-        "roles/bigquery.dataEditor",
-        "roles/storage.objectAdmin",
-        "roles/logging.logWriter",
-      ]
-    },
-    {
-      account_id   = "terraform-sa-${var.env}"
-      display_name = "Terraform Deployment SA (${var.env})"
-      description  = "Service account used by Cloud Build / Terraform"
-      roles = [
-        "roles/editor",
-        "roles/iam.securityAdmin",
-      ]
-    },
-  ]
+#   service_accounts = [
+#     {
+#       account_id   = "composer-sa-${var.env}"
+#       display_name = "Cloud Composer SA (${var.env})"
+#       description  = "Service account for Cloud Composer workers"
+#       roles = [
+#         "roles/composer.worker",
+#         "roles/bigquery.dataEditor",
+#         "roles/storage.objectAdmin",
+#         "roles/logging.logWriter",
+#       ]
+#     },
+#     {
+#       account_id   = "terraform-sa-${var.env}"
+#       display_name = "Terraform Deployment SA (${var.env})"
+#       description  = "Service account used by Cloud Build / Terraform"
+#       roles = [
+#         "roles/editor",
+#         "roles/iam.securityAdmin",
+#       ]
+#     },
+#   ]
 
-  project_iam_bindings = [
-    {
-      role    = "roles/viewer"
-      members = var.viewer_members
-    },
-    {
-      role    = "roles/editor"
-      members = var.editor_members
-    },
-  ]
-}
+#   project_iam_bindings = [
+#     {
+#       role    = "roles/viewer"
+#       members = var.viewer_members
+#     },
+#     {
+#       role    = "roles/editor"
+#       members = var.editor_members
+#     },
+#   ]
+# }
 
 module "vpc" {
   source = "../../modules/vpc"
@@ -135,58 +135,58 @@ module "firewall" {
   ]
 }
 
-module "composer" {
-  source = "../../modules/composer"
+# module "composer" {
+#   source = "../../modules/composer"
 
-  project_id    = var.project_id
-  env           = var.env
-  composer_name = "${var.env}-composer"
-  region        = var.region
-  image_version = var.composer_image_version
+#   project_id    = var.project_id
+#   env           = var.env
+#   composer_name = "${var.env}-composer"
+#   region        = var.region
+#   image_version = var.composer_image_version
 
-  environment_size = "ENVIRONMENT_SIZE_MEDIUM"   # larger for prod
+#   environment_size = "ENVIRONMENT_SIZE_MEDIUM"   # larger for prod
 
-  scheduler_cpu        = 2
-  scheduler_memory_gb  = 7.5
-  scheduler_storage_gb = 10
-  scheduler_count      = 2   # HA schedulers
+#   scheduler_cpu        = 2
+#   scheduler_memory_gb  = 7.5
+#   scheduler_storage_gb = 10
+#   scheduler_count      = 2   # HA schedulers
 
-  worker_cpu        = 2
-  worker_memory_gb  = 7.5
-  worker_storage_gb = 10
-  worker_min_count  = 3
-  worker_max_count  = 10
+#   worker_cpu        = 2
+#   worker_memory_gb  = 7.5
+#   worker_storage_gb = 10
+#   worker_min_count  = 3
+#   worker_max_count  = 10
 
-  web_server_cpu       = 1
-  web_server_memory_gb = 3.75
+#   web_server_cpu       = 1
+#   web_server_memory_gb = 3.75
 
-  network_id    = module.vpc.network_id
-  subnetwork_id = module.vpc.subnet_ids["${var.env}-subnet-main"]
+#   network_id    = module.vpc.network_id
+#   subnetwork_id = module.vpc.subnet_ids["${var.env}-subnet-main"]
 
-  composer_service_account_email = module.iam.service_account_emails["composer-sa-${var.env}"]
+#   composer_service_account_email = module.iam.service_account_emails["composer-sa-${var.env}"]
 
-  pods_range_name     = "pods"
-  services_range_name = "services"
+#   pods_range_name     = "pods"
+#   services_range_name = "services"
 
-  enable_private_endpoint = true   # Airflow UI is private in prod
+#   enable_private_endpoint = true   # Airflow UI is private in prod
 
-  labels = {
-    team = var.team_label
-  }
+#   labels = {
+#     team = var.team_label
+#   }
 
-  airflow_config_overrides = {
-    "core-dags_are_paused_at_creation" = "True"
-    "scheduler-catchup_by_default"     = "False"
-  }
+#   airflow_config_overrides = {
+#     "core-dags_are_paused_at_creation" = "True"
+#     "scheduler-catchup_by_default"     = "False"
+#   }
 
-  env_variables = var.composer_env_vars
-  pypi_packages = var.composer_pypi_packages
+#   env_variables = var.composer_env_vars
+#   pypi_packages = var.composer_pypi_packages
 
-  maintenance_window = {
-    start_time = "2024-01-01T03:00:00Z"
-    end_time   = "2024-01-01T07:00:00Z"
-    recurrence = "FREQ=WEEKLY;BYDAY=SA"
-  }
+#   maintenance_window = {
+#     start_time = "2024-01-01T03:00:00Z"
+#     end_time   = "2024-01-01T07:00:00Z"
+#     recurrence = "FREQ=WEEKLY;BYDAY=SA"
+#   }
 
-  depends_on = [module.iam, module.vpc, module.firewall]
-}
+#   depends_on = [module.iam, module.vpc, module.firewall]
+# }

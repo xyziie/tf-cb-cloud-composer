@@ -12,45 +12,45 @@
 # }
 
 # ── IAM ───────────────────────────────────────────────────────────────────────
-module "iam" {
-  source = "../../modules/iam"
+# module "iam" {
+#   source = "../../modules/iam"
 
-  project_id = var.project_id
+#   project_id = var.project_id
 
-  service_accounts = [
-    {
-      account_id   = "composer-sa-${var.env}"
-      display_name = "Cloud Composer SA (${var.env})"
-      description  = "Service account for Cloud Composer workers"
-      roles = [
-        "roles/composer.worker",
-        "roles/bigquery.dataEditor",
-        "roles/storage.objectAdmin",
-        "roles/logging.logWriter",
-      ]
-    },
-    {
-      account_id   = "terraform-sa-${var.env}"
-      display_name = "Terraform Deployment SA (${var.env})"
-      description  = "Service account used by Cloud Build / Terraform"
-      roles = [
-        "roles/editor",
-        "roles/iam.securityAdmin",
-      ]
-    },
-  ]
+#   service_accounts = [
+#     {
+#       account_id   = "composer-sa-${var.env}"
+#       display_name = "Cloud Composer SA (${var.env})"
+#       description  = "Service account for Cloud Composer workers"
+#       roles = [
+#         "roles/composer.worker",
+#         "roles/bigquery.dataEditor",
+#         "roles/storage.objectAdmin",
+#         "roles/logging.logWriter",
+#       ]
+#     },
+#     {
+#       account_id   = "terraform-sa-${var.env}"
+#       display_name = "Terraform Deployment SA (${var.env})"
+#       description  = "Service account used by Cloud Build / Terraform"
+#       roles = [
+#         "roles/editor",
+#         "roles/iam.securityAdmin",
+#       ]
+#     },
+#   ]
 
-  project_iam_bindings = [
-    {
-      role    = "roles/viewer"
-      members = var.viewer_members
-    },
-    {
-      role    = "roles/editor"
-      members = var.editor_members
-    },
-  ]
-}
+#   project_iam_bindings = [
+#     {
+#       role    = "roles/viewer"
+#       members = var.viewer_members
+#     },
+#     {
+#       role    = "roles/editor"
+#       members = var.editor_members
+#     },
+#   ]
+# }
 
 # ── VPC ───────────────────────────────────────────────────────────────────────
 module "vpc" {
@@ -127,57 +127,57 @@ module "firewall" {
 }
 
 # ── Cloud Composer ────────────────────────────────────────────────────────────
-module "composer" {
-  source = "../../modules/composer"
+# module "composer" {
+#   source = "../../modules/composer"
 
-  project_id    = var.project_id
-  env           = var.env
-  composer_name = "${var.env}-composer"
-  region        = var.region
-  image_version = var.composer_image_version
+#   project_id    = var.project_id
+#   env           = var.env
+#   composer_name = "${var.env}-composer"
+#   region        = var.region
+#   image_version = var.composer_image_version
 
-  environment_size = "ENVIRONMENT_SIZE_SMALL"
+#   environment_size = "ENVIRONMENT_SIZE_SMALL"
 
-  # Scheduler resources (small for dev)
-  scheduler_cpu        = 0.5
-  scheduler_memory_gb  = 1.875
-  scheduler_storage_gb = 1
-  scheduler_count      = 1
+#   # Scheduler resources (small for dev)
+#   scheduler_cpu        = 0.5
+#   scheduler_memory_gb  = 1.875
+#   scheduler_storage_gb = 1
+#   scheduler_count      = 1
 
-  # Worker resources (small for dev)
-  worker_cpu        = 0.5
-  worker_memory_gb  = 1.875
-  worker_storage_gb = 1
-  worker_min_count  = 1
-  worker_max_count  = 3
+#   # Worker resources (small for dev)
+#   worker_cpu        = 0.5
+#   worker_memory_gb  = 1.875
+#   worker_storage_gb = 1
+#   worker_min_count  = 1
+#   worker_max_count  = 3
 
-  network_id    = module.vpc.network_id
-  subnetwork_id = module.vpc.subnet_ids["${var.env}-subnet-main"]
+#   network_id    = module.vpc.network_id
+#   subnetwork_id = module.vpc.subnet_ids["${var.env}-subnet-main"]
 
-  composer_service_account_email = module.iam.service_account_emails["composer-sa-${var.env}"]
+#   composer_service_account_email = module.iam.service_account_emails["composer-sa-${var.env}"]
 
-  pods_range_name     = "pods"
-  services_range_name = "services"
+#   pods_range_name     = "pods"
+#   services_range_name = "services"
 
-  enable_private_endpoint = false   # dev: Airflow UI is accessible
+#   enable_private_endpoint = false   # dev: Airflow UI is accessible
 
-  labels = {
-    team = var.team_label
-  }
+#   labels = {
+#     team = var.team_label
+#   }
 
-  airflow_config_overrides = {
-    "core-dags_are_paused_at_creation" = "True"
-    "webserver-dag_orientation"        = "TB"
-  }
+#   airflow_config_overrides = {
+#     "core-dags_are_paused_at_creation" = "True"
+#     "webserver-dag_orientation"        = "TB"
+#   }
 
-  env_variables = var.composer_env_vars
-  pypi_packages = var.composer_pypi_packages
+#   env_variables = var.composer_env_vars
+#   pypi_packages = var.composer_pypi_packages
 
-  maintenance_window = {
-    start_time = "2024-01-01T02:00:00Z"
-    end_time   = "2024-01-01T06:00:00Z"
-    recurrence = "FREQ=WEEKLY;BYDAY=SU"
-  }
+#   maintenance_window = {
+#     start_time = "2024-01-01T02:00:00Z"
+#     end_time   = "2024-01-01T06:00:00Z"
+#     recurrence = "FREQ=WEEKLY;BYDAY=SU"
+#   }
 
-  depends_on = [module.iam, module.vpc, module.firewall]
-}
+#   depends_on = [module.iam, module.vpc, module.firewall]
+# }
