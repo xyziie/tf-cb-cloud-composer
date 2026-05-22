@@ -13,17 +13,17 @@ output "subnet_cidrs" {
   value       = module.vpc.subnet_cidrs
 }
 
-output "composer_airflow_uri" {
-  description = "Airflow web UI URI"
-  value       = module.composer.airflow_uri
-}
+# output "composer_airflow_uri" {
+#   description = "Airflow web UI URI"
+#   value       = module.composer.airflow_uri
+# }
 
-output "composer_gcs_bucket" {
-  description = "Composer DAG bucket"
-  value       = module.composer.gcs_bucket
-}
+# output "composer_gcs_bucket" {
+#   description = "Composer DAG bucket"
+#   value       = module.composer.gcs_bucket
+# }
 
-output "service_account_emails" {
-  description = "Created service account emails"
-  value       = module.iam.service_account_emails
-}
+# output "service_account_emails" {
+#   description = "Created service account emails"
+#   value       = module.iam.service_account_emails
+# }
