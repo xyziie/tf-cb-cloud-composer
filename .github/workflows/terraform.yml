@@ -18,7 +18,7 @@ jobs:
       contents: read
       id-token: write
     env:
-      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true  # ← add this
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
       - name: Checkout
@@ -29,10 +29,8 @@ jobs:
         run: |
           if [ "${{ github.ref_name }}" == "main" ]; then
             echo "ENV=prod" >> $GITHUB_ENV
-            echo "env=prod" >> $GITHUB_OUTPUT
           else
             echo "ENV=dev" >> $GITHUB_ENV
-            echo "env=dev" >> $GITHUB_OUTPUT
           fi
 
       - name: Authenticate to GCP via WIF
@@ -47,6 +45,13 @@ jobs:
       - name: Terraform Init
         working-directory: environments/${{ env.ENV }}
         run: terraform init
+
+      - name: Import Existing SAs
+        working-directory: environments/${{ env.ENV }}
+        run: |
+          terraform import \
+            'module.iam.google_service_account.accounts["terraform-sa-dev"]' \
+            projects/qwiklabs-gcp-01-3ba4b097d6eb/serviceAccounts/terraform-sa-dev@qwiklabs-gcp-01-3ba4b097d6eb.iam.gserviceaccount.com || true
 
       - name: Terraform Validate
         working-directory: environments/${{ env.ENV }}
