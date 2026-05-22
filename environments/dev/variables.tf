@@ -12,7 +12,7 @@ variable "region" {
 variable "env" {
   description = "Environment name"
   type        = string
-  default     = "devv"
+  default     = "devv-2"
 }
 
 variable "org_id" {
