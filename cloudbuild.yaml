@@ -1,0 +1,66 @@
+################################################################################
+# cloudbuild.yaml
+# Triggered by GitHub Actions. Runs Terraform init, plan, apply.
+# ENV substitution is passed in by the GitHub Actions workflow.
+################################################################################
+
+substitutions:
+  _ENV: "dev"                          # overridden by GitHub Actions (dev | prod)
+  _TF_VERSION: "1.8.0"
+  _STATE_BUCKET: "tf-state-${PROJECT_ID}-${_ENV}"  # resolved at runtime
+
+steps:
+  # ── 1. Show Terraform version ────────────────────────────────────────────────
+  - name: "hashicorp/terraform:${_TF_VERSION}"
+    id: tf-version
+    entrypoint: terraform
+    args: ["version"]
+
+  # ── 2. Terraform Init ────────────────────────────────────────────────────────
+  - name: "hashicorp/terraform:${_TF_VERSION}"
+    id: tf-init
+    entrypoint: terraform
+    dir: "environments/${_ENV}"
+    args:
+      - init
+      - -backend-config=bucket=${_STATE_BUCKET}
+      - -backend-config=prefix=terraform/state
+      - -reconfigure
+
+  # ── 3. Terraform Validate ────────────────────────────────────────────────────
+  - name: "hashicorp/terraform:${_TF_VERSION}"
+    id: tf-validate
+    entrypoint: terraform
+    dir: "environments/${_ENV}"
+    args: ["validate"]
+
+  # ── 4. Terraform Plan ────────────────────────────────────────────────────────
+  - name: "hashicorp/terraform:${_TF_VERSION}"
+    id: tf-plan
+    entrypoint: terraform
+    dir: "environments/${_ENV}"
+    args:
+      - plan
+      - -var-file=terraform.tfvars
+      - -out=/workspace/tfplan-${_ENV}
+
+  # ── 5. Terraform Apply (only on main/develop branch, not PRs) ────────────────
+  - name: "hashicorp/terraform:${_TF_VERSION}"
+    id: tf-apply
+    entrypoint: terraform
+    dir: "environments/${_ENV}"
+    args:
+      - apply
+      - -auto-approve
+      - /workspace/tfplan-${_ENV}
+
+options:
+  logging: CLOUD_LOGGING_ONLY
+  machineType: "e2-medium"
+
+timeout: "3600s"
+
+tags:
+  - terraform
+  - gcp
+  - "${_ENV}"
