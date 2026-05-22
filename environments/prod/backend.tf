@@ -1,7 +1,6 @@
 terraform {
   backend "gcs" {
-    # bucket and prefix injected at `terraform init` time via -backend-config
-    # bucket = "tf-state-<PROJECT_ID>-prod"
-    # prefix = "terraform/state"
+    bucket = "tf-state-qwiklabs-gcp-01-3ba4b097d6eb-prod"
+    prefix = "terraform/state"
   }
 }
