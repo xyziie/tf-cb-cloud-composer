@@ -1,0 +1,61 @@
+# .github/workflows/terraform.yml
+name: Terraform CI/CD
+
+on:
+  push:
+    branches:
+      - develop
+      - main
+  pull_request:
+    branches:
+      - develop
+      - main
+
+jobs:
+  terraform:
+    name: Terraform
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write  # Required for WIF
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Resolve Environment
+        id: resolve
+        run: |
+          if [ "${{ github.ref_name }}" == "main" ]; then
+            echo "ENV=prod" >> $GITHUB_ENV
+            echo "env=prod" >> $GITHUB_OUTPUT
+          else
+            echo "ENV=dev" >> $GITHUB_ENV
+            echo "env=dev" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Authenticate to GCP via WIF
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SA_EMAIL }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init
+        working-directory: environments/${{ env.ENV }}
+        run: terraform init
+
+      - name: Terraform Validate
+        working-directory: environments/${{ env.ENV }}
+        run: terraform validate
+
+      - name: Terraform Plan
+        working-directory: environments/${{ env.ENV }}
+        run: terraform plan
+
+      - name: Terraform Apply
+        working-directory: environments/${{ env.ENV }}
+        if: github.event_name == 'push'
+        run: terraform apply -auto-approve
